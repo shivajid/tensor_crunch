@@ -1,10 +1,10 @@
 flax
 jax[tpu]
-jax-numpy
+#jax-numpy
 kagglehub
 optax
 orbax-checkpoint
-qwix
-tunix
+git+https://github.com/google/qwix
 datasets
 sentencepiece
+grain
