@@ -140,6 +140,13 @@ def create_datasets(
     eval_ds = split_dataset['test']
 
     #eval_ds = None
+  elif dataset_name == "lavita/ChatDoctor-HealthCareMagic-100k":
+    train_ds = datasets.load_dataset(
+        dataset_name, split=("train")
+    )
+    split_dataset = train_ds.train_test_split(test_size=0.2, seed=42)
+    train_ds = split_dataset['train']
+    eval_ds = split_dataset['test']
   elif dataset_name == "microsoft/DialoGPT-medium":  # Medical dialogue (can be adapted)
     train_ds, eval_ds = datasets.load_dataset(
         dataset_name, split=("train", "validation")
@@ -256,7 +263,7 @@ class _Tokenize(grain.MapTransform):
         full_instruction = f"{element['instruction']}\n{element['input']}"
       else:
         full_instruction = element["instruction"]
-        src_tokens = self._tokenizer.tokenize(
+      src_tokens = self._tokenizer.tokenize(
           full_instruction,
           prefix=self._input_template["prefix"],
           suffix=self._input_template["suffix"],
@@ -265,6 +272,21 @@ class _Tokenize(grain.MapTransform):
       dst_tokens = self._tokenizer.tokenize(
           element["response"], add_eos=True
       )
+    elif "instruction" in element.keys() and "output" in element.keys():
+        if "input" in element.keys() and element["input"]:
+            full_instruction = f"{element['instruction']}\n{element['input']}"
+        else:
+            full_instruction = element["instruction"]
+        src_tokens = self._tokenizer.tokenize(
+          full_instruction,
+          prefix=self._input_template["prefix"],
+          suffix=self._input_template["suffix"],
+          add_eos=False,
+        )
+      dst_tokens = self._tokenizer.tokenize(
+          element["output"], add_eos=True
+      )
+
     elif "text" in element.keys() and "summary" in element.keys():  ## Summarization datasets
       src_tokens = self._tokenizer.tokenize(
           element["text"],
