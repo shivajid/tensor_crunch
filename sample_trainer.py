@@ -2,6 +2,8 @@ import shutil
 import gc
 import os
 import time
+#import wandb
+
 
 from flax import nnx
 import jax
@@ -32,10 +34,17 @@ EVAL_EVERY_N_STEPS = 20
 NUM_EPOCHS = 3
 
 
+import wandb
+wandb.init()
+wandb.login()
+
 # Checkpoint saving
 INTERMEDIATE_CKPT_DIR = "/mnt/disks/workdir/content/intermediate_ckpt/"
-CKPT_DIR = "/mnt/disks/workdir/content/ckpts/"
+CKPT_DIR = "/mnt/disks/workdir/content/ckpts/01/"
 PROFILING_DIR = "/mnt/disks/workdir/content/profiling/"
+
+#if os.path.exists(CKPT_DIR):
+#    shutil.rmtree(CKPT_DIR)
 
 if "KAGGLE_USERNAME" not in os.environ or "KAGGLE_KEY" not in os.environ:
   kagglehub.login()
