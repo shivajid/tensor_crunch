@@ -183,17 +183,17 @@ class _Tokenize(grain.MapTransform):
       dst_tokens = self._tokenizer.tokenize(
           element["dst"].decode(), add_eos=True
       )
-  elif "input" in element.keys():
-      src_tokens =  self.tokenizer.tokenize(
-          element["input"].decode(),
+    elif "input" in element.keys():
+      src_tokens =  self._tokenizer.tokenize(
+          element["input"],
           #prefix=self._input_template["prefix"],
           #suffix=self._input_template["suffix"],
           add_eos=False,
       )
       dst_tokens = self._tokenizer.tokenize(
-          element["output"].decode(), add_eos=True
+          element["output"], add_eos=True
       )
-  else:  ## OPUS-100 dataset
+    else:  ## OPUS-100 dataset
       src_tokens = self._tokenizer.tokenize(
           element["translation"]["en"],
           prefix=self._input_template["prefix"],
