@@ -40,11 +40,11 @@ INPUT_TEMPLATE_IT = {
 class GemmaTokenizer(spm.SentencePieceProcessor):
   """Tokenizing and encoding/decoding text using the Sentencepiece tokenizer."""
 
-  _GEMMA2_TOKENIZER_PATH: epath.PathLike = (
-      'gs://gemma-data/tokenizers/tokenizer_gemma2.model'
+  _GEMMA3_TOKENIZER_PATH: epath.PathLike = (
+      'gs://gemma-data/tokenizers/tokenizer_gemma3.model'
   )
 
-  def __init__(self, model_path: str = _GEMMA2_TOKENIZER_PATH):
+  def __init__(self, model_path: str = _GEMMA3_TOKENIZER_PATH):
     model_proto = epath.Path(model_path).read_bytes()
     super().__init__()
     self.LoadFromSerializedProto(model_proto)
@@ -106,73 +106,11 @@ def create_datasets(
     train_ds, eval_ds = datasets.load_dataset(
         dataset_name, data_dir="en-fr", split=("train", "validation")
     )
-  elif dataset_name == "squad":  # Question-Answering
-    train_ds, eval_ds = datasets.load_dataset(
-        dataset_name, split=("train", "validation")
-    )
-  elif dataset_name == "hotpot_qa":  # Multi-hop QA
-    train_ds, eval_ds = datasets.load_dataset(
-        dataset_name, split=("train", "validation")
-    )
-  elif dataset_name == "cnn_dailymail":  # Summarization
-    train_ds, eval_ds = datasets.load_dataset(
-        dataset_name, "3.0.0", split=("train", "validation")
-    )
-  elif dataset_name == "xsum":  # Extreme Summarization
-    train_ds, eval_ds = datasets.load_dataset(
-        dataset_name, split=("train", "validation")
-    )
-  elif dataset_name == "tatsu-lab/alpaca":  # Instruction following
-    train_ds, eval_ds = datasets.load_dataset(
-        dataset_name, split=("train", "validation")
-    )
-  elif dataset_name == "databricks/databricks-dolly-15k":  # Instruction following
-    train_ds, eval_ds = datasets.load_dataset(
-        dataset_name, split=("train", "validation")
-    )
-  # Medical Datasets
-  elif dataset_name == "medalpaca/medical_meadow_medqa":  # Medical instruction dataset
-    train_ds = datasets.load_dataset(
-        dataset_name, split=("train")
-    )
-    split_dataset = train_ds.train_test_split(test_size=0.2, seed=42)
-    train_ds = split_dataset['train']
-    eval_ds = split_dataset['test']
-
-    #eval_ds = None
-  elif dataset_name == "lavita/ChatDoctor-HealthCareMagic-100k":
-    train_ds = datasets.load_dataset(
-        dataset_name, split=("train")
-    )
-    split_dataset = train_ds.train_test_split(test_size=0.2, seed=42)
-    train_ds = split_dataset['train']
-    eval_ds = split_dataset['test']
-  elif dataset_name == "microsoft/DialoGPT-medium":  # Medical dialogue (can be adapted)
-    train_ds, eval_ds = datasets.load_dataset(
-        dataset_name, split=("train", "validation")
-    )
-  elif dataset_name == "pubmed_qa":  # Medical QA dataset
-    train_ds, eval_ds = datasets.load_dataset(
-        dataset_name, split=("train", "validation")
-    )
-  elif dataset_name == "medical_dialog":  # Medical dialogue dataset
-    train_ds, eval_ds = datasets.load_dataset(
-        "medical_dialog", split=("train", "validation")
-    )
-  elif dataset_name == "medqa":  # Medical question answering
-    train_ds, eval_ds = datasets.load_dataset(
-        "medqa", split=("train", "validation")
-    )
-  elif dataset_name == "medmcqa":  # Medical multiple choice QA
-    train_ds, eval_ds = datasets.load_dataset(
-        "medmcqa", split=("train", "validation")
-    )
   else:
     raise ValueError(f"Unsupported dataset: {dataset_name}")
 
   input_template = INPUT_TEMPLATE_IT if instruct_tuned else INPUT_TEMPLATE
-  eval_loader = None
-  
+
   train_loader = _build_data_loader(
       data_source=train_ds,
       batch_size=global_batch_size,
@@ -181,8 +119,7 @@ def create_datasets(
       tokenizer=tokenizer,
       input_template=input_template,
   )
-  if eval_ds is not None:
-   eval_loader = _build_data_loader(
+  eval_loader = _build_data_loader(
       data_source=eval_ds,
       batch_size=global_batch_size,
       num_epochs=1,
@@ -229,16 +166,18 @@ class _Tokenize(grain.MapTransform):
   def map(self, element: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
     """Tokenize the input."""
     if "src" in element.keys():  ## MTNT dataset
+      #src = f"Translate this into French:\n {element['src']} \n"     
       src_tokens = self._tokenizer.tokenize(
           element["src"].decode(),
-          prefix=self._input_template["prefix"],
-          suffix=self._input_template["suffix"],
+          #src.decode(),
+          #prefix=self._input_template["prefix"],
+          #suffix=self._input_template["suffix"],
           add_eos=False,
       )
       dst_tokens = self._tokenizer.tokenize(
           element["dst"].decode(), add_eos=True
       )
-    elif "translation" in element.keys():  ## OPUS-100 dataset
+    else:  ## OPUS-100 dataset
       src_tokens = self._tokenizer.tokenize(
           element["translation"]["en"],
           prefix=self._input_template["prefix"],
@@ -248,89 +187,6 @@ class _Tokenize(grain.MapTransform):
       dst_tokens = self._tokenizer.tokenize(
           element["translation"]["fr"], add_eos=True
       )
-    elif "question" in element.keys() and "answer" in element.keys():  ## QA datasets
-      src_tokens = self._tokenizer.tokenize(
-          element["question"],
-          prefix=self._input_template["prefix"],
-          suffix=self._input_template["suffix"],
-          add_eos=False,
-      )
-      dst_tokens = self._tokenizer.tokenize(
-          element["answer"], add_eos=True
-      )
-    elif "instruction" in element.keys() and "response" in element.keys():  ## Instruction datasets
-      if "input" in element.keys() and element["input"]: # Ensure 'input' exists and is not empty
-        full_instruction = f"{element['instruction']}\n{element['input']}"
-      else:
-        full_instruction = element["instruction"]
-      src_tokens = self._tokenizer.tokenize(
-          full_instruction,
-          prefix=self._input_template["prefix"],
-          suffix=self._input_template["suffix"],
-          add_eos=False,
-        )
-      dst_tokens = self._tokenizer.tokenize(
-          element["response"], add_eos=True
-      )
-    elif "instruction" in element.keys() and "output" in element.keys():
-        if "input" in element.keys() and element["input"]:
-            full_instruction = f"{element['instruction']}\n{element['input']}"
-        else:
-            full_instruction = element["instruction"]
-        src_tokens = self._tokenizer.tokenize(
-          full_instruction,
-          prefix=self._input_template["prefix"],
-          suffix=self._input_template["suffix"],
-          add_eos=False,
-        )
-      dst_tokens = self._tokenizer.tokenize(
-          element["output"], add_eos=True
-      )
-
-    elif "text" in element.keys() and "summary" in element.keys():  ## Summarization datasets
-      src_tokens = self._tokenizer.tokenize(
-          element["text"],
-          prefix=self._input_template["prefix"],
-          suffix=self._input_template["suffix"],
-          add_eos=False,
-      )
-      dst_tokens = self._tokenizer.tokenize(
-          element["summary"], add_eos=True
-      )
-    elif "instruction" in element.keys() and "output" in element.keys():  ## Medical instruction datasets
-      src_tokens = self._tokenizer.tokenize(
-          element["instruction"],
-          prefix=self._input_template["prefix"],
-          suffix=self._input_template["suffix"],
-          add_eos=False,
-      )
-      dst_tokens = self._tokenizer.tokenize(
-          element["output"], add_eos=True
-      )
-    elif "question" in element.keys() and "answer" in element.keys():  ## Medical QA datasets
-      src_tokens = self._tokenizer.tokenize(
-          element["question"],
-          prefix=self._input_template["prefix"],
-          suffix=self._input_template["suffix"],
-          add_eos=False,
-      )
-      dst_tokens = self._tokenizer.tokenize(
-          element["answer"], add_eos=True
-      )
-    elif "context" in element.keys() and "question" in element.keys() and "answer" in element.keys():  ## Medical context QA
-      # Combine context and question
-      combined_input = f"Context: {element['context']}\nQuestion: {element['question']}"
-      src_tokens = self._tokenizer.tokenize(
-          combined_input,
-          prefix=self._input_template["prefix"],
-          suffix=self._input_template["suffix"],
-          add_eos=False,
-      )
-      dst_tokens = self._tokenizer.tokenize(
-          element["answer"], add_eos=True
-      )
-    else:
-      raise ValueError(f"Unsupported dataset format: {element.keys()}")
     return src_tokens, dst_tokens
 
 
