@@ -18,7 +18,8 @@ import optax
 from orbax import checkpoint as ocp
 from qwix import lora
 from tunix.generate import sampler as sampler_lib
-from tunix.models.gemma import data as data_lib
+import data as data_lib
+#from tunix.models.gemma import data as data_lib
 from tunix.models.gemma import gemma as gemma_lib
 from tunix.models.gemma import params as params_lib
 from tunix.sft import metrics_logger
@@ -49,9 +50,9 @@ NUM_EPOCHS = 3
 print(f"MESH {MESH}")
 
 # Checkpoint saving
-INTERMEDIATE_CKPT_DIR = "/home/shivajid/med_intermediate_ckpt/med/"
-CKPT_DIR = "/home/shivajid/ckpts/med/01/"
-PROFILING_DIR = "/home/shivajid/profiling/med"
+INTERMEDIATE_CKPT_DIR = "/mnt/disks/workdir/med_intermediate_ckpt/med/"
+CKPT_DIR = "/mnt/disks/workdir/ckpts/med/01/"
+PROFILING_DIR = "/mnt/disks/workdir/profiling/med"
 
 # Kaggle login
 if "KAGGLE_USERNAME" not in os.environ or "KAGGLE_KEY" not in os.environ:
@@ -180,7 +181,7 @@ train_ds_medalpaca, validation_ds_medalpaca  = data_lib.create_datasets(
     max_target_length=256,
     num_train_epochs=NUM_EPOCHS,
     tokenizer=gemma_tokenizer,
-    instruct_tuned=True,  # Use instruction format
+    #instruct_tuned=True,  # Use instruction format
 )
 
 # Training configuration for MedAlpaca
@@ -194,8 +195,8 @@ training_config_medalpaca = peft_trainer.TrainingConfig(
     eval_every_n_steps=EVAL_EVERY_N_STEPS,
     max_steps=MAX_STEPS,
     checkpoint_root_directory=CKPT_DIR,
-    metrics_logging_options=logging_option_medalpaca,
-    profiler_options=profiler_option_medalpaca,
+    #metrics_logging_options=logging_option_medalpaca,
+    #profiler_options=profiler_option_medalpaca,
 )
 
 lora_trainer_medalpaca = peft_trainer.PeftTrainer(
