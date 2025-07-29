@@ -106,6 +106,13 @@ def create_datasets(
     train_ds, eval_ds = datasets.load_dataset(
         dataset_name, data_dir="en-fr", split=("train", "validation")
     )
+  elif dataset_name == "medalpaca/medical_meadow_medqa":  # Medical instruction dataset
+    train_ds = datasets.load_dataset(
+        dataset_name, split=("train")
+    )   
+    split_dataset = train_ds.train_test_split(test_size=0.2, seed=42)
+    train_ds = split_dataset['train']
+    eval_ds = split_dataset['test']
   else:
     raise ValueError(f"Unsupported dataset: {dataset_name}")
 
@@ -169,7 +176,6 @@ class _Tokenize(grain.MapTransform):
       #src = f"Translate this into French:\n {element['src']} \n"     
       src_tokens = self._tokenizer.tokenize(
           element["src"].decode(),
-          #src.decode(),
           #prefix=self._input_template["prefix"],
           #suffix=self._input_template["suffix"],
           add_eos=False,
@@ -177,7 +183,17 @@ class _Tokenize(grain.MapTransform):
       dst_tokens = self._tokenizer.tokenize(
           element["dst"].decode(), add_eos=True
       )
-    else:  ## OPUS-100 dataset
+  elif "input" in element.keys():
+      src_tokens =  self.tokenizer.tokenize(
+          element["input"].decode(),
+          #prefix=self._input_template["prefix"],
+          #suffix=self._input_template["suffix"],
+          add_eos=False,
+      )
+      dst_tokens = self._tokenizer.tokenize(
+          element["output"].decode(), add_eos=True
+      )
+  else:  ## OPUS-100 dataset
       src_tokens = self._tokenizer.tokenize(
           element["translation"]["en"],
           prefix=self._input_template["prefix"],
