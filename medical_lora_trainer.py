@@ -43,7 +43,7 @@ RANK = 16
 ALPHA = 2.0
 
 # Train
-MAX_STEPS = 500
+MAX_STEPS = 100
 EVAL_EVERY_N_STEPS = 20
 NUM_EPOCHS = 3
 
@@ -51,7 +51,7 @@ print(f"MESH {MESH}")
 
 # Checkpoint saving
 INTERMEDIATE_CKPT_DIR = "/mnt/disks/workdir/med_intermediate_ckpt/med/"
-CKPT_DIR = "/mnt/disks/workdir/ckpts/med/01/"
+CKPT_DIR = "/mnt/disks/workdir/ckpts/med/14/"
 PROFILING_DIR = "/mnt/disks/workdir/profiling/med"
 
 # Kaggle login
@@ -112,7 +112,7 @@ sampler = sampler_lib.Sampler(
     transformer=gemma,
     tokenizer=gemma_tokenizer,
     cache_config=sampler_lib.CacheConfig(
-        cache_size=256,
+        cache_size=1024,
         num_layers=model_config.num_layers,
         num_kv_heads=model_config.num_kv_heads,
         head_dim=model_config.head_dim,
@@ -176,9 +176,10 @@ def gen_model_input_fn(x: peft_trainer.TrainingInput):
 # Example 1: Medical Instruction Dataset (MedAlpaca)
 print("\n=== Training on MedAlpaca Medical Instruction Dataset ===")
 train_ds_medalpaca, validation_ds_medalpaca  = data_lib.create_datasets(
-    dataset_name='medalpaca/medical_meadow_medqa',
+    #dataset_name='medalpaca/medical_meadow_medqa',
+    dataset_name='lavita/ChatDoctor-HealthCareMagic-100k',
     global_batch_size=BATCH_SIZE,
-    max_target_length=256,
+    max_target_length=2048,
     num_train_epochs=NUM_EPOCHS,
     tokenizer=gemma_tokenizer,
     #instruct_tuned=True,  # Use instruction format
@@ -277,7 +278,7 @@ sampler_trained = sampler_lib.Sampler(
     transformer=lora_gemma,
     tokenizer=gemma_tokenizer,
     cache_config=sampler_lib.CacheConfig(
-        cache_size=256,
+        cache_size=1024,
         num_layers=model_config.num_layers,
         num_kv_heads=model_config.num_kv_heads,
         head_dim=model_config.head_dim,
@@ -309,7 +310,7 @@ medical_test_questions_after = [
 
 out_data_after = sampler_trained(
     input_strings=medical_test_questions_after,
-    total_generation_steps=50,
+    total_generation_steps=512,
 )
 
 for question, answer in zip(medical_test_questions_after, out_data_after.text):
