@@ -280,11 +280,11 @@ for i, (input_string, out_string) in enumerate(zip(input_batch, out_data.text)):
 print ("Merging checkpoint")
 print ("Loading checkpoint")
 
-trained_ckpt_path = os.path.join(CKPT_DIR, MAX_STEPS, "model_params")
+trained_ckpt_path = os.path.join(CKPT_DIR, str(MAX_STEPS), "model_params")
 
 abs_params = jax.tree.map(
     lambda x: jax.ShapeDtypeStruct(x.shape, x.dtype),
-    nnx.state(lora_gemma, nnx.LoRAParam),
+    nnx.state(lora_gemma3, nnx.LoRAParam),
 )
 
 print("restoring checkpoint")
@@ -295,10 +295,10 @@ trained_lora_params = checkpointer.restore(trained_ckpt_path, target=abs_params)
 
 
 nnx.update(
-    lora_gemma,
+    lora_gemma3,
     jax.tree.map(
         lambda a, b: b,
-        nnx.state(lora_gemma, nnx.LoRAParam),
+        nnx.state(lora_gemma3, nnx.LoRAParam),
         trained_lora_params,
     ),
 )
