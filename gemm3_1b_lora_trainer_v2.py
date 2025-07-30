@@ -11,7 +11,6 @@ import optax
 from orbax import checkpoint as ocp
 from qwix import lora
 from tunix.generate import sampler as sampler_lib
-#from tunix.models.gemma import data as data_lib
 import data as data_lib
 from tunix.models.gemma import gemma as gemma_lib
 from tunix.models.gemma3 import model as gemma3_lib
@@ -46,9 +45,9 @@ print(f"LoRA Rank: {RANK}, Alpha: {ALPHA}")
 print(f"Training Steps: {MAX_STEPS}, Eval Every: {EVAL_EVERY_N_STEPS}")
 
 # Checkpoint saving
-INTERMEDIATE_CKPT_DIR = "/mnt/disks/workdir/inter_ckpt/gemma3/1b-it/intermediate_ckpt/"
-CKPT_DIR = "/mnt/disks/workdir/ckpts/gemma3/1b/ckpts_corrected/"
-PROFILING_DIR = "/mnt/disks/workdir/profiling/gemma3/1b/profiling/"
+INTERMEDIATE_CKPT_DIR = "/home/shivajid/gemma3/1b-it/intermediate_ckpt/"
+CKPT_DIR = "/home/shivajid/gemma3/1b-it/ckpts_corrected/"
+PROFILING_DIR = "/home/shivajid/gemma3/1b-it/profiling/"
 
 def chk_mkdir(dir_path):
     if not os.path.exists(dir_path):
@@ -66,14 +65,14 @@ def cleanup_checkpoints():
         shutil.rmtree(CKPT_DIR)
     os.makedirs(CKPT_DIR, exist_ok=True)
 
-cleanup_checkpoints()
+#cleanup_checkpoints()
 
 # Kaggle login
 if "KAGGLE_USERNAME" not in os.environ or "KAGGLE_KEY" not in os.environ:
     kagglehub.login()
 
-# Download Gemma3 1B checkpoint
-kaggle_ckpt_path = kagglehub.model_download("google/gemma-3/flax/gemma3-1b")
+# Download Gemma3 1B IT checkpoint
+kaggle_ckpt_path = kagglehub.model_download("google/gemma-3/flax/gemma3-1b-it/1")
 
 # Load Gemma3 1B IT model
 model_config = gemma3_lib.Gemma3Config.gemma3_1b()
@@ -82,7 +81,7 @@ model_config = gemma3_lib.Gemma3Config.gemma3_1b()
 def load_it_model_with_weights():
     """Load the IT model with actual instruction-tuned weights."""
     # Load the actual weights from the IT checkpoint
-    it_checkpoint_path = os.path.join(kaggle_ckpt_path, "gemma3-1b")
+    it_checkpoint_path = os.path.join(kaggle_ckpt_path, "gemma3-1b-it")
     print(f"Loading IT weights from: {it_checkpoint_path}")
     
     # Use the proper loading function from params_lib
@@ -105,7 +104,7 @@ checkpoint_path = os.path.join(INTERMEDIATE_CKPT_DIR, "state")
 
 # Save checkpoint if it doesn't exist
 #if not os.path.exists(checkpoint_path):
-shutil.rmtree(checkpoint_path, ignore_errors=True)
+shutil.rmtree(checkpoint_path)
 print(f"Saving checkpoint to: {checkpoint_path}")
 checkpointer.save(os.path.join(checkpoint_path), state)
 checkpointer.wait_until_finished()
@@ -136,12 +135,8 @@ gemma3, mesh, model_config = get_base_model(
 )
 
 # Load Gemma3 tokenizer
-GEMMA_PATH = "/kaggle/input/gemma-3/flax/gemma3-1b/1"
-TOKENIZER_PATH = os.path.join(kaggle_ckpt_path, 'tokenizer.model')
 print(f"Gemma3 tokenizer: {params_lib.GEMMA3_TOKENIZER}")
-#gemma3_tokenizer = params_lib.create_tokenizer(params_lib.GEMMA3_TOKENIZER)
-
-gemma3_tokenizer = params_lib.create_tokenizer(TOKENIZER_PATH)
+gemma3_tokenizer = params_lib.create_tokenizer(params_lib.GEMMA3_TOKENIZER)
 
 # Test base model performance
 sampler = sampler_lib.Sampler(
@@ -157,9 +152,8 @@ sampler = sampler_lib.Sampler(
 
 # Use the correct instruction format from params_lib
 def format_instruction(prompt):
-    """Format prompt using the official Gemma3 template."""
-    #return params_lib.PROMPT_TEMPLATE.format(prompt)
-    return prompt
+    """Format prompt using the official Gemma3 IT template."""
+    return params_lib.PROMPT_TEMPLATE.format(prompt)
 
 # Test prompts with correct instruction format
 input_batch = [
@@ -315,7 +309,7 @@ print("\nConverting and saving the fine-tuned model to .safetensors format...")
 
 # --- 1. Define the output directory ---
 # This is where your final .safetensors file will be saved.
-SERVABLE_CKPT_DIR = "/mnt/disks/workdirsafetensors_ckpt/gemma_3_1b_it_en_fr/"
+SERVABLE_CKPT_DIR = "/home/shivajid/safetensors_ckpt/gemma_1b_it_en_fr/"
 if os.path.exists(SERVABLE_CKPT_DIR):
     shutil.rmtree(SERVABLE_CKPT_DIR)
 os.makedirs(SERVABLE_CKPT_DIR, exist_ok=True)
@@ -358,7 +352,7 @@ def model_state_to_hf_weights(state: nnx.State, rank: int, alpha: float) -> dict
         if idx == 0:
          print(f"layer: \n {layer} \n")
         weights_dict[f'model.layers.{idx}.input_layernorm.weight'] = jax.device_put(layer.pre_attention_norm.scale.value, cpu)
-        weights_dict[f'model.layers.{idx}.post_attention_layernorm.weight'] = jax.device_put(layer.pre_ffw_norm.scale.value, cpu)
+        weights_dict[f'model.layers.{idx}.post_attention_layernorm.weight'] = jax.device_put(layer.post_attention_norm.scale.value, cpu)
         # Corrected paths for q_norm and k_norm based on the provided state dump
         weights_dict[f'model.layers.{idx}.self_attn.q_norm.weight'] = jax.device_put(layer.attn._query_norm.scale.value, cpu)
         weights_dict[f'model.layers.{idx}.self_attn.k_norm.weight'] = jax.device_put(layer.attn._key_norm.scale.value, cpu)
