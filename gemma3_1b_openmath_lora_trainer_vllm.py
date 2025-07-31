@@ -153,10 +153,10 @@ sampler = sampler_lib.Sampler(
 
 # Test prompts with correct instruction format
 input_batch = [
-    "Translate this into French: Hello, my name is Morgane.",
-    "Translate this into French: This dish is delicious!",
-    "Translate this into French: I am a student.",
-    "Translate this into French: How's the weather today?",
+    "Lennon is a sales rep and is paid $0.36 in mileage reimbursement when he travels to meet with clients. On Monday he drove 18 miles. Tuesday he drove 26 miles. Wednesday and Thursday he drove 20 miles each day and on Friday he drove 16 miles. How much money will he be reimbursed?",
+    "What is 52 multiplied by 29",
+    "Jerry has three times as many stickers as George. George has 6 fewer stickers than his brother Fred. If Fred has 18 stickers, how many stickers does Jerry have?",
+    "Josh went to the shopping center. He bought 9 films and 4 books. He also bought 6 CDs. Each film cost $5, each book cost $4 and each CD cost $3. How much did Josh spend in all?",
 ]
 
 print("=== Base Model Performance ===")
@@ -257,7 +257,8 @@ sampler = sampler_lib.Sampler(
     ),
 )
 
-
+# Use from above input batch
+'''
 # Test prompts with correct instruction format
 input_batch = [
     "Translate this into French: Hello, my name is Morgane.",
@@ -265,7 +266,7 @@ input_batch = [
     "Translate this into French: I am a student.",
     "Translate this into French: How's the weather today?",
 ]
-
+'''
 out_data = sampler(
     input_strings=input_batch,
     total_generation_steps=50,
