@@ -18,7 +18,7 @@ from tunix.models.gemma3 import params as params_lib
 from tunix.sft import metrics_logger
 from tunix.sft import peft_trainer
 import os
-
+import wandb
 os.environ["JAX_TRACEBACK_FILTERING"] = "off"
 
 print("Welcome to Corrected Gemma3 1B LoRA Tuning")
@@ -37,15 +37,15 @@ ALPHA = 1.0  # Very small for   model
 # Train - Very conservative training for   model
 MAX_STEPS = 200  # Very few steps for   model
 EVAL_EVERY_N_STEPS = 20  # Frequent evaluation
-NUM_EPOCHS = 5 # Single epoch for   model
+NUM_EPOCHS = 10 # Single epoch for   model
 
 print(f"MESH {MESH}")
 print(f"LoRA Rank: {RANK}, Alpha: {ALPHA}")
 print(f"Training Steps: {MAX_STEPS}, Eval Every: {EVAL_EVERY_N_STEPS}")
 
 # Checkpoint saving
-INTERMEDIATE_CKPT_DIR = "/mnt/disks/workdir/gemma3/1b/math/intermediate_ckpt/v2/"
-CKPT_DIR = "/mnt/disks/workdir/gemma3/1b/ckpts/allenai_Math/v2/"
+INTERMEDIATE_CKPT_DIR = "/mnt/disks/workdir/gemma3/1b/math/intermediate_ckpt/v3/"
+CKPT_DIR = "/mnt/disks/workdir/gemma3/1b/ckpts/allenai_Math/v3/"
 PROFILING_DIR = "/mnt/disks/workdir/gemma3/1b/profiling/"
 
 def chk_mkdir(dir_path):
@@ -260,6 +260,7 @@ sampler = sampler_lib.Sampler(
         head_dim=model_config.head_dim,
     ),
 )
+wandb.init()
 
 out_data = sampler(
     input_strings=input_batch,
@@ -308,7 +309,7 @@ print("\nConverting and saving the fine-tuned model to .safetensors format...")
 
 # --- 1. Define the output directory ---
 # This is where your final .safetensors file will be saved.
-SERVABLE_CKPT_DIR = "/mnt/disks/workdir/final_models/gemma3_1b_allenai_math/v2/"
+SERVABLE_CKPT_DIR = "/mnt/disks/workdir/final_models/gemma3_1b_allenai_math/v3/"
 if os.path.exists(SERVABLE_CKPT_DIR):
     shutil.rmtree(SERVABLE_CKPT_DIR)
 os.makedirs(SERVABLE_CKPT_DIR, exist_ok=True)
