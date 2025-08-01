@@ -35,7 +35,7 @@ RANK = 8  # Very small for   model
 ALPHA = 1.0  # Very small for   model
 
 # Train - Very conservative training for   model
-MAX_STEPS = 200  # Very few steps for   model
+MAX_STEPS = 800  # Very few steps for   model
 EVAL_EVERY_N_STEPS = 20  # Frequent evaluation
 NUM_EPOCHS = 1 # Single epoch for   model
 
@@ -247,8 +247,8 @@ training_config = peft_trainer.TrainingConfig(
 trainer = peft_trainer.PeftTrainer(gemma3, optax.adamw(1e-5), training_config)
 trainer = trainer.with_gen_model_input_fn(gen_model_input_fn)
 
-with jax.profiler.trace(os.path.join(PROFILING_DIR, "full_training")):
-  with mesh:
+#with jax.profiler.trace(os.path.join(PROFILING_DIR, "full_training")):
+with mesh:
     trainer.train(train_ds, validation_ds)
 
 '''
