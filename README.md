@@ -10,7 +10,7 @@ The initial set of examples are for
 
 The tunining recepies are similar in nature. Due to changes in architecture between Gemma and Gemm3, the conversion scripts are also different. You can find the individual examples indeis the `trainer` directories. 
 
-The `data.py` has details on the datasets it supports and how to get the needed tokenizers based on tunix. The default example is based on a `medqa` dataset.
+The `data.py` has details on the datasets it supports and how to get the needed tokenizers based on tunix. The default example is based on a `medalpaca/medical_meadow_medqa` dataset. You can find more details on the default trainer in the root folder at `docs/gemma3_1b_fft_trainer_guide.md`.
 
 
 ## Repository Structure
