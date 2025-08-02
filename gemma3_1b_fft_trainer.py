@@ -314,9 +314,9 @@ def main(args):
 
     # Train the model
     # Initialize wandb
-    wandb.init()
-    trained_model = train_model(model, tokenizer, mesh, args)
     
+    trained_model = train_model(model, tokenizer, mesh, args)
+    wandb.init()
     # Inference after training
     run_inference(trained_model, tokenizer, model_config, test_prompts, "Fine-Tuned Model Performance")
     
