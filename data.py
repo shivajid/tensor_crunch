@@ -121,10 +121,15 @@ def create_datasets(
     train_ds = split_dataset['train']
     eval_ds = split_dataset['test']
   elif dataset_name == "nvidia/OpenMathInstruct-1":
-    train_dsi, eval_ds  = datasets.load_dataset(dataset_name, data_dir="correct_solutions", split=("train","validation")
+    train_ds, eval_ds  = datasets.load_dataset(dataset_name, data_dir="correct_solutions", split=("train","validation"))
     #split_dataset = train_ds.train_test_split(test_size=0.2, seed=42)
     #train_ds = split_dataset['train']
     #eval_ds = split_dataset['test']
+  elif dataset_name == "allenai/open_math_2_50k_r1-original":
+    train_ds   = datasets.load_dataset(dataset_name, data_dir="data", split=("train"))
+    split_dataset = train_ds.train_test_split(test_size=0.2, seed=42)
+    train_ds = split_dataset['train']
+    eval_ds = split_dataset['test']
   else:
     raise ValueError(f"Unsupported dataset: {dataset_name}")
 
@@ -207,7 +212,10 @@ class _Tokenize(grain.MapTransform):
       )
     elif "question" in element.keys():
         src_tokens = self._tokenizer.tokenize(element["question"], add_eos=False,)
-        dst_tokens = self._tokenizer.tokenize(element["expected_answer"]
+        dst_tokens = self._tokenizer.tokenize(element["expected_answer"])
+    elif "problem" in element.keys():
+        src_tokens = self._tokenizer.tokenize(element["problem"], add_eos=False,)
+        dst_tokens = self._tokenizer.tokenize(element["generated_solution"])
     else:  ## OPUS-100 dataset
       src_tokens = self._tokenizer.tokenize(
           element["translation"]["en"],
