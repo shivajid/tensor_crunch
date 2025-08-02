@@ -498,35 +498,3 @@ def model_state_to_hf_weights(state: nnx.State, rank: int, alpha: float) -> dict
 
 # Extract the state (the weights) from the trained LoRA model object
 _, state = nnx.split(gemma3)
-
-
-# Perform the conversion on the CPU to be memory-safe
-with jax.default_device(jax.devices("cpu")[0]):
-    hf_weights = model_state_to_hf_weights(state,rank=RANK, alpha=ALPHA)
-
-print('Finished converting model weights to safetensors format')
-
-
-# vLLM wants the weight dictionary flattened
-def flatten_weight_dict(torch_params, prefix=""):
-    flat_params = {}
-    for key, value in torch_params.items():
-        new_key = f"{prefix}{key}" if prefix else key
-        if isinstance(value, dict):
-            flat_params.update(flatten_weight_dict(value, new_key + "."))
-        else:
-            flat_params[new_key] = value
-    return flat_params
-
-servable_weights = flatten_weight_dict(hf_weights)
-
-from safetensors.flax import save_file
-
-# Save the converted weights dictionary to a .safetensors file
-save_file(servable_weights, os.path.join(SERVABLE_CKPT_DIR, 'model.safetensors'))
-
-print(f" Model successfully saved to {os.path.join(SERVABLE_CKPT_DIR, 'model.safetensors')}")
-
-from huggingface_hub import snapshot_download
-snapshot_download(repo_id="google/gemma-3-1b-it", allow_patterns="*.json", local_dir=SERVABLE_CKPT_DIR)
-
