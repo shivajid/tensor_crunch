@@ -253,14 +253,18 @@ def save_safetensors(model, model_config, args):
         weights_dict = {}
         cpu = jax.devices("cpu")[0]
         scaling_factor = alpha / rank
-        vocab_size = model_config.vocab_size
+        vocab_size = 262144  # Assuming vocab size is 262144 for Gemma3 1B
         weights_dict['model.embed_tokens.weight'] = jax.device_put(
             state.embedder.input_embedding.value, cpu
         )[:vocab_size, :]
         weights_dict['model.norm.weight'] = jax.device_put(state.final_norm.scale.value, cpu)
-        embed_dim = model_config.embed_dim
-        num_heads = model_config.num_heads
-        head_dim = model_config.head_dim
+        
+        embed_dim = 1152
+        hidden_dim = 6 * 1152
+        num_heads = 4
+        num_kv_heads = 1
+        head_dim = 256
+        
         for idx, layer in state.layers.items():
             weights_dict[f'model.layers.{idx}.input_layernorm.weight'] = jax.device_put(layer.pre_attention_norm.scale.value, cpu)
             weights_dict[f'model.layers.{idx}.post_attention_layernorm.weight'] = jax.device_put(layer.post_attention_norm.scale.value, cpu)
