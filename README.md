@@ -1,111 +1,110 @@
-# PEFT Tuning of Gemma Models with JAX and PyTorch
+# Tensor Crunch: PEFT Tuning with JAX 
+This repository provides a collection of scripts and examples for Parameter-Efficient Fine-Tuning (PEFT) of large language models, with a focus on Google's Gemma models. It includes implementations for techniques like LoRA (Low-Rank Adaptation) and FFT (Fast Fourier Transform) using both JAX/Flax and PyTorch.
 
-This repository provides a collection of scripts and tools for fine-tuning Google's Gemma models using Parameter-Efficient Fine-Tuning (PEFT) techniques such as LoRA (Low-Rank Adaptation) and  Full Fine tuning (FFT). The primary frameworks used are JAX with Tunix. The traning checkpoints are saved in Orbax and then converted to `safetensors` format to be able to served by vLLM server.
-
-## Project Overview
-
-The main goal of this project is to offer a practical, hands-on environment for experimenting with different fine-tuning strategies on Gemma models. Key features include:
-
-*   **PEFT Techniques:** Implementations for LoRA and FFT to adapt large models with minimal computational overhead.
-*   **Multiple Frameworks:** Support for JAX , allowing for flexibility in training environments.
-*   **Models:** Focused on the Gemma family of models (e.g., Gemma 2B and 3B). This can be extended to supported models of Tunix.
-*   **Secure Serialization:** Outputs trained models in the `safetensors` format for enhanced security and performance.
-*   **Deployment Ready:** Includes examples and guidance for deploying fine-tuned models with vLLM for high-performance inference.
+The primary goal of this repository is to serve as a practical guide for fine-tuning models on custom datasets, producing efficient `safetensor` artifacts, and deploying them for inference using vLLM.
 
 ## Repository Structure
 
-The repository is organized into the following key directories:
+The repository is organized as follows:
 
-*   `tensor_crunch/trainer/`: Contains the core training scripts, categorized by Gemma model versions (e.g., `gemma2b`, `gemma3b`). Each subdirectory includes scripts for different fine-tuning methods and datasets.
-*   `tensor_crunch/utility/`: Includes helper scripts and utilities, such as the `hf_safetensor_test.py` script for verifying trained models.
-*   `tensor_crunch/scripts/`: Contains shell scripts for setting up the environment, like `create_python_env.sh`.
-*   `tensor_crunch/docs/`: Provides additional documentation and guides for specific trainers.
+-   `tensor_crunch/`: The main source directory.
+    -   `trainer/`: Contains the training scripts for different model versions (Gemma-2B, Gemma-3B) and tuning methods.
+        -   `gemma2b/`: Scripts for Gemma-2B models.
+        -   `gemma3b/`: Scripts for Gemma-3B models.
+    -   `utility/`: Contains utility scripts, including a script to test `safetensor` checkpoints.
+    -   `scripts/`: Helper scripts for environment setup.
+    -   `docs/`: Additional documentation and guides.
+    -   `data.py`: Data loading and preprocessing scripts.
+    -   `Dockerfile`: Dockerfile for containerized environment.
+    -   `requirements.txt`: Python dependencies.
+-   `README.md`: This file.
 
 ## Getting Started
 
-To begin, set up your environment and run a training script.
-
-### Hardware Requirements
-
-The training scripts in this repository are designed to run on Google Cloud TPUs. Specifically, they are optimized for **TPU v6e** instances. The default configuration is set up to run on a `v6e-4` machine.
-
 ### 1. Environment Setup
 
-Create a Python virtual environment and install the required dependencies.
+It is recommended to use a Python virtual environment.
 
 ```bash
-# Create and activate a Python 3.11 virtual environment
-./tensor_crunch/scripts/create_python_env.sh
-
-# Activate the environment
+python3.11 -m venv .venv
 source .venv/bin/activate
-
-# Install dependencies
-pip install -r tensor_crunch/requirements.txt
+pip install -r requirements.txt
 ```
 
-### 2. Run a Training Script
+For projects involving TPUs, you might need to follow specific setup instructions for JAX on TPU VMs.
 
-To run the main training script for Gemma 3.1B with FFT, use the following command. This example includes all the required arguments to get started.
+### 2. Running Training Scripts
+
+The training scripts are located in the `tensor_crunch/trainer/` directory. You can run a training script as follows:
 
 ```bash
-python tensor_crunch/gemma3_1b_fft_trainer.py \
-    --intermediate_ckpt_dir ./output/intermediate_ckpt/fft/v3/ \
-    --ckpt_dir ./output/ckpts/medical/fft/v3/ \
-    --profiling_dir ./output/profiling/ \
-    --servable_ckpt_dir ./output/servable_ckpt/fft/v1/ \
-    --batch_size 16 \
-    --rank 16 \
-    --max_steps 500 \
-    --dataset_name "medalpaca/medical_meadow_medqa"
+python tensor_crunch/trainer/gemma3b/gemma3_1b_medical_qa_fft_trainer_vllm.py
 ```
 
-For more detailed information on the trainer and its parameters, please refer to the [Gemma 3.1B FFT Trainer Guide](./docs/gemma3_1b_fft_trainer_guide.md).
+Make sure to adjust the script and its parameters (e.g., dataset path, model name, output directories) as needed.
 
 ## Verifying Safetensors
 
-After training, your model is saved in the `safetensors` format. You can verify the model by running the provided test script `tensor_crunch/utility/hf_safetensor_test.py`. This script loads a fine-tuned model and runs inference to ensure it's working correctly.
+After training, a `safetensor` file is created. You can verify this checkpoint using the `tensor_crunch/utility/hf_safetensor_test.py` script.
 
-### How to Use
+The script performs the following steps:
 
-1.  **Update the Model Path**: Open [`tensor_crunch/utility/hf_safetensor_test.py`](tensor_crunch/utility/hf_safetensor_test.py:12) and update the `local_model_path` variable to point to your checkpoint directory.
+1.  **Load Tokenizer and Model**: It loads the tokenizer and the fine-tuned model from the specified local directory where the `safetensors` are stored.
+2.  **Prepare Prompt**: A sample prompt is prepared to test the model's response.
+3.  **Run Inference**: The model generates a response based on the prompt.
+4.  **Decode and Print**: The generated output is decoded and printed to the console.
+
+Here is how to use it:
+
+1.  Open `tensor_crunch/utility/hf_safetensor_test.py`.
+2.  Modify the `local_model_path` variable to point to the directory containing your `model.safetensors` file and tokenizer configuration.
 
     ```python
-    # Define the path to your local model directory
     local_model_path = "/path/to/your/gemma_safe_tensor_ckpts"
     ```
 
-2.  **Run the script**:
+3.  Run the script:
+
     ```bash
     python tensor_crunch/utility/hf_safetensor_test.py
     ```
 
-The output will show the model's response to the prompt in the script: `"I have a 5 month old baby, what is the common cause of death? "`.
+4.  Check the output to see the model's response.
 
 ## Deploying with vLLM
 
-You can deploy your `safetensors` model for high-throughput inference using a vLLM server.
+Once you have a verified `safetensor` checkpoint, you can deploy it for high-throughput inference using the vLLM server.
 
-### 1. Launch the vLLM Server
+### 1. Launching the vLLM Server
 
-Start the vLLM server and point it to your local model directory.
+Use the following command to launch the vLLM server with your fine-tuned model.
 
 ```bash
 python -m vllm.entrypoints.openai.api_server \
     --model /path/to/your/gemma_safe_tensor_ckpts \
-    --served-model-name gemma-lora-tuned
+    --lora-modules /path/to/your/gemma_safe_tensor_ckpts \
+    --tensor-parallel-size 1 \
+    --gpu-memory-utilization 0.9
 ```
 
-### 2. Test the Deployed Model
+-   `--model`: Path to the base model (if the fine-tuned model is an adapter) or the full model directory.
+-   `--lora-modules`: Path to the directory containing the LoRA `safetensor` adapter.
+-   `--tensor-parallel-size`: Number of GPUs to use.
+-   `--gpu-memory-utilization`: Fraction of GPU memory to use.
 
-You can now send requests to the vLLM server using a tool like `curl` or any HTTP client.
+### 2. Testing the Deployed Model
+
+You can send requests to the vLLM server using `curl` or any HTTP client.
 
 ```bash
 curl http://localhost:8000/v1/completions \
     -H "Content-Type: application/json" \
     -d '{
-        "model": "gemma-lora-tuned",
-        "prompt": "What is the capital of France?",
-        "max_tokens": 50,
+        "model": "/path/to/your/gemma_safe_tensor_ckpts",
+        "prompt": "I have a 5 month old baby, what is the common cause of death?",
+        "max_tokens": 200,
         "temperature": 0.7
     }'
+```
+
+This will send a request to the running vLLM server and return the model's completion.
