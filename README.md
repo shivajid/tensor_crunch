@@ -78,14 +78,14 @@ Ensure that you have an account and security keys setup.
 
 ### 2. Running Training Scripts
 
-The main training script is `tensor_crunch/gemma3_1b_fft_trainer.py`. This script handles the entire training pipeline, including data loading, model configuration, training, and saving checkpoints.
+The main training script is `gemma3_1b_fft_trainer.py`. This script handles the entire training pipeline, including data loading, model configuration, training, and saving checkpoints.
 
 To run the training script, use the following command structure. You must provide the required directory paths for checkpoints, profiling, and servable models.
 
 **Example:**
 
 ```bash
-python tensor_crunch/gemma3_1b_fft_trainer.py \
+python gemma3_1b_fft_trainer.py \
     --intermediate_ckpt_dir ./output/intermediate_ckpt/fft/v3/ \
     --ckpt_dir ./output/ckpts/medical/fft/v3/ \
     --profiling_dir ./output/profiling/ \
@@ -96,11 +96,11 @@ python tensor_crunch/gemma3_1b_fft_trainer.py \
     --dataset_name "medalpaca/medical_meadow_medqa"
 ```
 
-You can customize the training by modifying the arguments. For a full list of available arguments and their descriptions, refer to the docstring within the `tensor_crunch/gemma3_1b_fft_trainer.py` script. For more details, refer to the [Gemma 3B Trainer Guide](tensor_crunch/docs/gemma3_1b_fft_trainer_guide.md).
+You can customize the training by modifying the arguments. For a full list of available arguments and their descriptions, refer to the docstring within the `gemma3_1b_fft_trainer.py` script. For more details, refer to the [Gemma 3B Trainer Guide](docs/gemma3_1b_fft_trainer_guide.md).
 
 ## Verifying Safetensors
 
-After training, a `safetensor` file is created. You can verify this checkpoint using the `tensor_crunch/utility/hf_safetensor_test.py` script.
+After training, a `safetensor` file is created. You can verify this checkpoint using the `utility/hf_safetensor_test.py` script.
 
 The script performs the following steps:
 
@@ -111,7 +111,7 @@ The script performs the following steps:
 
 Here is how to use it:
 
-1.  Open `tensor_crunch/utility/hf_safetensor_test.py`.
+1.  Open `utility/hf_safetensor_test.py`.
 2.  Modify the `local_model_path` variable to point to the directory containing your `model.safetensors` file and tokenizer configuration.
 
     ```python
@@ -121,7 +121,7 @@ Here is how to use it:
 3.  Run the script:
 
     ```bash
-    python tensor_crunch/utility/hf_safetensor_test.py
+    python utility/hf_safetensor_test.py
     ```
 
 4.  Check the output to see the model's response.
