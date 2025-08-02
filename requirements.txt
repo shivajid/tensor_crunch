@@ -8,3 +8,5 @@ git+https://github.com/google/qwix
 datasets
 sentencepiece
 grain
+tensorflow_datasets
+wandb
