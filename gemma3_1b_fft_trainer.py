@@ -84,6 +84,7 @@ from tunix.sft import metrics_logger
 from tunix.sft import peft_trainer
 import wandb
 from safetensors.flax import save_file
+from huggingface_hub import snapshot_download
 
 # -- Global Constants --
 # Model
@@ -103,6 +104,7 @@ def parse_args():
     parser.add_argument("--ckpt_dir", type=str,required=True, default="./output/ckpts/medical/fft/v3/", help="Checkpoint directory.")
     parser.add_argument("--profiling_dir", type=str, required=True, default="./output/profiling/", help="Profiling directory.")
     parser.add_argument("--servable_ckpt_dir", type=str, required=True, default="./output/servable_ckpt/fft/v1/", help="Servable checkpoint directory.")
+    parser.add_argument("--test_prompts_file", type=str, default=None, help="Path to a file containing test prompts, one per line.")
     return parser.parse_args()
 
 def setup_environment(args):
@@ -246,6 +248,12 @@ def save_safetensors(model, model_config, args):
         shutil.rmtree(args.servable_ckpt_dir)
     os.makedirs(args.servable_ckpt_dir, exist_ok=True)
 
+    snapshot_download(
+        repo_id="google/gemma-3-1b-it",
+        allow_patterns="*.json",
+        local_dir=args.servable_ckpt_dir
+    )
+
     _, state = nnx.split(model)
     
     # The conversion function remains complex and is kept as is.
@@ -309,11 +317,15 @@ def main(args):
     model, tokenizer, mesh, model_config = load_model_and_tokenizer(kaggle_path, args)
 
     # Initial inference before training
-    test_prompts = [
-        "What are the symptoms of pnuemonia?",
-        "How is hypertension diagnosed?",
-        "What is the procedure for a colonoscopy?",
-    ]
+    if args.test_prompts_file:
+        with open(args.test_prompts_file, 'r') as f:
+            test_prompts = [line.strip() for line in f]
+    else:
+        test_prompts = [
+            "What are the symptoms of pnuemonia?",
+            "How is hypertension diagnosed?",
+            "What is the procedure for a colonoscopy?",
+        ]
     run_inference(model, tokenizer, model_config, test_prompts, "Base Model Performance")
 
     # Train the model
