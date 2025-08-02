@@ -1,4 +1,4 @@
-# Tensor Crunch: PEFT Tuning with JAX
+# Tensor Crunch: LLM Fine-Tuning with JAX/Tunix and Maxtext
 
 This repository provides a collection of scripts and examples for Parameter-Efficient Fine-Tuning (PEFT) of large language models, with a focus on Google's Gemma models. It includes implementations for techniques like LoRA (Low-Rank Adaptation) and SFT using both JAX/Flax. These tutorials are build using Google's [Tunix](https://github.com/google/tunix.git). You can read more about it in the  ([docs](https://deepwiki.com/google/tunix/1-overview)).
 
