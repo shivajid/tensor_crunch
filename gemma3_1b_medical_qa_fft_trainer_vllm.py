@@ -28,7 +28,7 @@ print("Let's have some fun with Gemma3!")
 BATCH_SIZE = 8  # Very conservative for   model
 
 # Model
-MESH = [(2, 4), ("fsdp", "tp")]
+MESH = [(1, 4), ("fsdp", "tp")]
 
 # LoRA - Very conservative for   model
 RANK = 8  # Very small for   model
@@ -44,9 +44,9 @@ print(f"LoRA Rank: {RANK}, Alpha: {ALPHA}")
 print(f"Training Steps: {MAX_STEPS}, Eval Every: {EVAL_EVERY_N_STEPS}")
 
 # Checkpoint saving
-INTERMEDIATE_CKPT_DIR = "/mnt/disks/workdir/gemma3/1b/medical/intermediate_ckpt/fft/v3/"
-CKPT_DIR = "/mnt/disks/workdir/gemma3/1b/ckpts/medical/fft/v3/"
-PROFILING_DIR = "/mnt/disks/workdir/gemma3/1b/profiling/"
+INTERMEDIATE_CKPT_DIR = "/home/shivajid/gemma3/1b/medical/intermediate_ckpt/fft/v3/"
+CKPT_DIR = "/home/shivajid/gemma3/1b/ckpts/medical/fft/v3/"
+PROFILING_DIR = "/home/shivajid/gemma3/1b/profiling/"
 
 def chk_mkdir(dir_path):
     if not os.path.exists(dir_path):
@@ -155,11 +155,13 @@ sampler = sampler_lib.Sampler(
 
 # Test prompts with correct instruction format
 input_batch = [
-    "Lennon is a sales rep and is paid $0.36 in mileage reimbursement when he travels to meet with clients. On Monday he drove 18 miles. Tuesday he drove 26 miles. Wednesday and Thursday he drove 20 miles each day and on Friday he drove 16 miles. How much money will he be reimbursed?",
-    "What is 52 multiplied by 29",
-    "Jerry has three times as many stickers as George. George has 6 fewer stickers than his brother Fred. If Fred has 18 stickers, how many stickers does Jerry have?",
-    "Josh went to the shopping center. He bought 9 films and 4 books. He also bought 6 CDs. Each film cost $5, each book cost $4 and each CD cost $3. How much did Josh spend in all?",
+"What are the symptoms of pnuemonia?",
+    "How is hypertension diagnosed?",
+    "What is the procedure for a colonoscopy?",
+    "What are the side effects of aspirin?",
+    "What is the difference between systolic and diastolic blood pressure?",
 ]
+
 
 print("=== Base Model Performance ===")
 out_data = sampler(
@@ -233,7 +235,7 @@ def gen_model_input_fn(x: peft_trainer.TrainingInput):
     }
 #Training with full weights
 logging_option = metrics_logger.MetricsLoggerOptions(
-    log_dir="/mnt/disks/workdir/profiling", flush_every_n_steps=20
+    log_dir="/home/shivajid/profiling", flush_every_n_steps=20
 )
 
 # PEFT Training
@@ -320,7 +322,7 @@ print("\nConverting and saving the fine-tuned model to .safetensors format...")
 
 # --- 1. Define the output directory ---
 # This is where your final .safetensors file will be saved.
-SERVABLE_CKPT_DIR = "/mnt/disks/workdir/final_models/gemma3_1b_medalpaca_medical_meadow_medqa/fft/v1/"
+SERVABLE_CKPT_DIR = "/home/shivajid/final_models/gemma3_1b_medalpaca_medical_meadow_medqa/fft/v1/"
 if os.path.exists(SERVABLE_CKPT_DIR):
     shutil.rmtree(SERVABLE_CKPT_DIR)
 os.makedirs(SERVABLE_CKPT_DIR, exist_ok=True)
