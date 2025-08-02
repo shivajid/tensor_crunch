@@ -1,8 +1,17 @@
 # Tensor Crunch: LLM Fine-Tuning with JAX/Tunix and Maxtext
 
-This repository provides a collection of scripts and examples for Parameter-Efficient Fine-Tuning (PEFT) of large language models, with a focus on Google's Gemma models. It includes implementations for techniques like LoRA (Low-Rank Adaptation) and SFT using both JAX/Flax. These tutorials are build using Google's [Tunix](https://github.com/google/tunix.git). You can read more about it in the  ([docs](https://deepwiki.com/google/tunix/1-overview)).
+This repository provides a collection of scripts and examples for Parameter-Efficient Fine-Tuning (PEFT) of large language models, with a focus on Google's Gemma models in the first phase and then will expand to other models. It includes implementations for techniques like LoRA (Low-Rank Adaptation) and SFT using both JAX/Flax. These tutorials are build using Google's [Tunix](https://github.com/google/tunix.git). You can read more about it in the  ([docs](https://deepwiki.com/google/tunix/1-overview)). I also plan to include Maxtext as examples into this.
 
 The primary goal of this repository is to serve as a practical guide for fine-tuning models on custom datasets, producing efficient `safetensor` artifacts, and deploying them for inference using vLLM.
+
+The initial set of examples are for
+-   Gemma-2B
+-   Gemma3-1B
+
+The tunining recepies are similar in nature. Due to changes in architecture between Gemma and Gemm3, the conversion scripts are also different. You can find the individual examples indeis the `trainer` directories. 
+
+The `data.py` has details on the datasets it supports and how to get the needed tokenizers based on tunix. The default example is based on a `medqa` dataset.
+
 
 ## Repository Structure
 
