@@ -1,12 +1,5 @@
-<pre>
-  .--.
---> /,-. \ <--
-   ( ( `))
---> \ `-/ <--
-     `--'
-</pre>
 
-# Tensor Crunch: PEFT Tuning with JAX and PyTorch
+# Tensor Crunch: PEFT Tuning with JAX
 This repository provides a collection of scripts and examples for Parameter-Efficient Fine-Tuning (PEFT) of large language models, with a focus on Google's Gemma models. It includes implementations for techniques like LoRA (Low-Rank Adaptation) and SFT using both JAX/Flax.
 
 The primary goal of this repository is to serve as a practical guide for fine-tuning models on custom datasets, producing efficient `safetensor` artifacts, and deploying them for inference using vLLM.
@@ -43,13 +36,25 @@ For projects involving TPUs, you might need to follow specific setup instruction
 
 ### 2. Running Training Scripts
 
-The training scripts are located in the `tensor_crunch/trainer/` directory. You can run a training script as follows:
+The main training script is `tensor_crunch/gemma3_1b_fft_trainer.py`. This script handles the entire training pipeline, including data loading, model configuration, training, and saving checkpoints.
+
+To run the training script, use the following command structure. You must provide the required directory paths for checkpoints, profiling, and servable models.
+
+**Example:**
 
 ```bash
-python tensor_crunch/trainer/gemma3b/gemma3_1b_medical_qa_fft_trainer_vllm.py
+python tensor_crunch/gemma3_1b_fft_trainer.py \
+    --intermediate_ckpt_dir ./output/intermediate_ckpt/fft/v3/ \
+    --ckpt_dir ./output/ckpts/medical/fft/v3/ \
+    --profiling_dir ./output/profiling/ \
+    --servable_ckpt_dir ./output/servable_ckpt/fft/v1/ \
+    --batch_size 16 \
+    --rank 16 \
+    --max_steps 500 \
+    --dataset_name "medalpaca/medical_meadow_medqa"
 ```
 
-Make sure to adjust the script and its parameters (e.g., dataset path, model name, output directories) as needed.
+You can customize the training by modifying the arguments. For a full list of available arguments and their descriptions, refer to the docstring within the `tensor_crunch/gemma3_1b_fft_trainer.py` script. For more details, refer to the [Gemma 3B FFT Trainer Guide](tensor_crunch/docs/gemma3_1b_fft_trainer_guide.md).
 
 ## Verifying Safetensors
 
