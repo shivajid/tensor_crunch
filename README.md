@@ -1,5 +1,13 @@
-# Tensor Crunch: PEFT Tuning with JAX 
-This repository provides a collection of scripts and examples for Parameter-Efficient Fine-Tuning (PEFT) of large language models, with a focus on Google's Gemma models. It includes implementations for techniques like LoRA (Low-Rank Adaptation) and FFT (Fast Fourier Transform) using both JAX/Flax and PyTorch.
+<pre>
+  .--.
+--> /,-. \ <--
+   ( ( `))
+--> \ `-/ <--
+     `--'
+</pre>
+
+# Tensor Crunch: PEFT Tuning with JAX and PyTorch
+This repository provides a collection of scripts and examples for Parameter-Efficient Fine-Tuning (PEFT) of large language models, with a focus on Google's Gemma models. It includes implementations for techniques like LoRA (Low-Rank Adaptation) and SFT using both JAX/Flax.
 
 The primary goal of this repository is to serve as a practical guide for fine-tuning models on custom datasets, producing efficient `safetensor` artifacts, and deploying them for inference using vLLM.
 
