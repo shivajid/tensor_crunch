@@ -6,7 +6,7 @@ WORKDIR /app
 
 # 2. Install Python dependencies
 # Copy requirements first to leverage Docker layer caching
-COPY tensor_crunch/requirements.txt .
+COPY requirements.txt .
 
 # Install git for the qwix dependency
 RUN apt-get update && apt-get install -y git
@@ -24,9 +24,9 @@ ENV KAGGLE_USERNAME=$KAGGLE_USERNAME
 ENV KAGGLE_KEY=$KAGGLE_KEY
 
 # 4. Copy necessary application files
-COPY tensor_crunch/gemma3_1b_medical_qa_fft_trainer_vllm_refactored.py .
-COPY tensor_crunch/data.py .
+COPY gemma3_1b_medical_qa_fft_trainer_vllm_parameterized.py .
+COPY data.py .
 
 # 5. Define the CMD to execute the Python script
-ENTRYPOINT ["python", "gemma3_1b_medical_qa_fft_trainer_vllm_refactored.py"]
+ENTRYPOINT ["python", "gemma3_1b_medical_qa_fft_trainer_vllm_parameterized.py"]
 CMD ["--help"]
