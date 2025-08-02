@@ -1,3 +1,70 @@
+"""
+Trains a Gemma 3.1B model with FFT and LoRA on a specified dataset.
+
+This script handles the entire training pipeline, including data loading,
+model configuration with LoRA, training, evaluation, and saving checkpoints.
+
+Usage:
+------
+To run the training script, use the following command structure.
+You must provide the required directory paths for checkpoints and profiling.
+
+Example:
+--------
+```bash
+python tensor_crunch/gemma3_1b_fft_trainer.py \
+    --intermediate_ckpt_dir ./output/intermediate_ckpt/fft/v3/ \
+    --ckpt_dir ./output/ckpts/medical/fft/v3/ \
+    --profiling_dir ./output/profiling/ \
+    --servable_ckpt_dir ./output/servable_ckpt/fft/v1/ \
+    --batch_size 16 \
+    --rank 16 \
+    --max_steps 500 \
+    --dataset_name "medalpaca/medical_meadow_medqa"
+```
+
+Arguments:
+----------
+    --batch_size (int, optional):
+        Batch size for training.
+        Default: 8
+
+    --rank (int, optional):
+        Rank for LoRA.
+        Default: 8
+
+    --alpha (float, optional):
+        Alpha for LoRA.
+        Default: 1.0
+
+    --max_steps (int, optional):
+        Maximum training steps.
+        Default: 200
+
+    --eval_every_n_steps (int, optional):
+        Evaluate every N steps.
+        Default: 20
+
+    --num_epochs (int, optional):
+        Number of training epochs.
+        Default: 1
+
+    --dataset_name (str, optional):
+        The name of the dataset to use from the Hugging Face Hub.
+        Default: "medalpaca/medical_meadow_medqa"
+
+    --intermediate_ckpt_dir (str, required):
+        Directory to save intermediate checkpoints during training.
+
+    --ckpt_dir (str, required):
+        Directory to save the final model checkpoint.
+
+    --profiling_dir (str, required):
+        Directory to save profiling output.
+
+    --servable_ckpt_dir (str, required):
+        Directory to save the servable model checkpoint.
+"""
 import os
 import shutil
 import argparse
