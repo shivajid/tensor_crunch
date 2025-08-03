@@ -98,6 +98,16 @@ python gemma3_1b_fft_trainer.py \
 
 You can customize the training by modifying the arguments. For a full list of available arguments and their descriptions, refer to the docstring within the `gemma3_1b_fft_trainer.py` script. For more details, refer to the [Gemma 3B Trainer Guide](docs/gemma3_1b_fft_trainer_guide.md).
 
+
+### 3. Training Metrics
+
+With WandDB integration, the trainer pushes training metrics over to Weights and Biases. You can see various metrics in the Wandb training run.
+At the end of the training, you will see the url where the metrics can be viewed. Click the link to view your run. E.g.
+```bash
+wandb: ⭐️ View project at https://wandb.ai/yyyy/xxxx?apiKey=nnnn
+wandb: 🚀 View run at https://wandb.ai/yyyy/xxx/runs/rrrrr?apiKey=nnnn
+```
+
 ## Verifying Safetensors
 
 After training, a `safetensor` file is created. You can verify this checkpoint using the `utility/hf_safetensor_test.py` script.
