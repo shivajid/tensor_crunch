@@ -71,7 +71,9 @@ Ensure that you have an account and security keys setup.
 ```
 **HUGGINGFACE**
 ```bash
-    export HUGGINGFACE_TOKEN=<key>
+    huggingface-cli login
+    
+    - Pass the HF Token
 ```
 
 
