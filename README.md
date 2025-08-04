@@ -33,13 +33,13 @@ The repository is organized as follows:
 
 ### Hardware Requirements
 The ([tunix](https://github.com/google/tunix.git)) library is built on jax and  targetted for TPUs. In the example we assume that you have TPU v6e-4 machine to work through the examples. 
-You can refer to the ([script](scripts/create_tpu_v6e.sh) to see how to create  TPU v6e VM. 
+You can refer to the ([script](scripts/create_tpu_v6e.sh)) to see how to create  TPU v6e VM. 
 
 The tutorial is for single hots TPUs (V6e-1,4 or 8) worker configurations. 
 
 ### 1. Environment Setup
 
-It is recommended to use a Python virtual environment. Tunix required python 3.11 for all the dependencies to work. The ([script](scripts/create_python_env.sh)) has scripts on how to setup python3.11 on your TPUV
+It is recommended to use a Python virtual environment. Tunix required python 3.11 for all the dependencies to work. The ([script](scripts/create_python_env.sh)) has scripts on how to setup python3.11 on your TPU VM.
 
 ```bash
 python3.11 -m venv .venv
