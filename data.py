@@ -36,6 +36,12 @@ INPUT_TEMPLATE_IT = {
     "suffix": "\n<end_of_turn>\n<start_of_turn>model\n",
 }
 
+# Chat template for medical conversations
+INPUT_TEMPLATE_MEDICAL_CHAT = {
+    "prefix": "<start_of_turn>user\n",
+    "suffix": "\n<end_of_turn>\n<start_of_turn>model\n",
+}
+
 
 class GemmaTokenizer(spm.SentencePieceProcessor):
   """Tokenizing and encoding/decoding text using the Sentencepiece tokenizer."""
@@ -133,7 +139,14 @@ def create_datasets(
   else:
     raise ValueError(f"Unsupported dataset: {dataset_name}")
 
-  input_template = INPUT_TEMPLATE_IT if instruct_tuned else INPUT_TEMPLATE
+  # Use appropriate template based on dataset and instruct_tuned flag
+  if instruct_tuned:
+    if dataset_name == "medalpaca/medical_meadow_medqa":
+      input_template = INPUT_TEMPLATE_MEDICAL_CHAT
+    else:
+      input_template = INPUT_TEMPLATE_IT
+  else:
+    input_template = INPUT_TEMPLATE
 
   train_loader = _build_data_loader(
       data_source=train_ds,
@@ -211,8 +224,28 @@ class _Tokenize(grain.MapTransform):
           element["output"], add_eos=True
       )
     elif "question" in element.keys():
-        src_tokens = self._tokenizer.tokenize(element["question"], add_eos=False,)
-        dst_tokens = self._tokenizer.tokenize(element["expected_answer"])
+        # Check if we're using medical chat template by comparing the actual template
+        is_medical_chat = (
+            self._input_template.get("prefix") == "<start_of_turn>user\n" and 
+            self._input_template.get("suffix") == "\n<end_of_turn>\n<start_of_turn>model\n"
+        )
+        
+        if is_medical_chat:
+            # Use chat template format for medical conversations
+            src_tokens = self._tokenizer.tokenize(
+                element["question"],
+                prefix=self._input_template["prefix"],
+                suffix=self._input_template["suffix"],
+                add_eos=False,
+            )
+            dst_tokens = self._tokenizer.tokenize(
+                element["expected_answer"], 
+                add_eos=True
+            )
+        else:
+            # Use regular format
+            src_tokens = self._tokenizer.tokenize(element["question"], add_eos=False,)
+            dst_tokens = self._tokenizer.tokenize(element["expected_answer"])
     elif "problem" in element.keys():
         src_tokens = self._tokenizer.tokenize(element["problem"], add_eos=False,)
         dst_tokens = self._tokenizer.tokenize(element["generated_solution"])
