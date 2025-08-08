@@ -209,6 +209,7 @@ def train_model(model, tokenizer, mesh, args):
         max_target_length=256,
         num_train_epochs=args.num_epochs,
         tokenizer=tokenizer,
+        instruct_tuned=True,  # Use instruction-tuned format for Gemma3-1B-IT
     )
 
     def gen_model_input_fn(x: peft_trainer.TrainingInput):
@@ -310,6 +311,11 @@ def save_safetensors(model, model_config, args):
     print(f"Safetensors file would be saved to: {os.path.join(args.servable_ckpt_dir, 'model.safetensors')}")
 
 
+def format_instruction_prompt(prompt):
+    """Format prompt using the official Gemma3-1B-IT chat template."""
+    return f"<start_of_turn>user\n{prompt}\n<end_of_turn>\n<start_of_turn>model\n"
+
+
 def main(args):
     """Orchestrates the entire model training and evaluation workflow."""
     setup_environment(args)
@@ -319,12 +325,14 @@ def main(args):
     # Initial inference before training
     if args.test_prompts_file:
         with open(args.test_prompts_file, 'r') as f:
-            test_prompts = [line.strip() for line in f]
+            test_prompts = [format_instruction_prompt(line.strip()) for line in f]
     else:
         test_prompts = [
-            "What are the symptoms of pnuemonia?",
-            "How is hypertension diagnosed?",
-            "What is the procedure for a colonoscopy?",
+            format_instruction_prompt("What are the symptoms of pneumonia?"),
+            format_instruction_prompt("How is hypertension diagnosed?"),
+            format_instruction_prompt("What is the procedure for a colonoscopy?"),
+            format_instruction_prompt("What are the side effects of aspirin?"),
+            format_instruction_prompt("What is the difference between systolic and diastolic blood pressure?"),
         ]
     run_inference(model, tokenizer, model_config, test_prompts, "Base Model Performance")
 
