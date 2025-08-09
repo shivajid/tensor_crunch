@@ -1,3 +1,5 @@
+This section of the work is from Dave Wan's ([repo](https://github.com/wadave/gemma3-adk.git))
+
 # Gemma 3 on Vertex AI & GKE with ADK 🚀
 
 This repository provides a comprehensive guide and all the necessary code to deploy a fine-tuned **Gemma 3** model on Google Cloud. You have two deployment options:
