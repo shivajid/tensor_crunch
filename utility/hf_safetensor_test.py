@@ -23,7 +23,8 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 
 # 5. Prepare your prompt and tokenize it
-prompt = "I have a 5 month old baby, what is the common cause of death? "
+#prompt = "I have a 5 month old baby, what is the common cause of death? "
+prompt = "<bos><start_of_turn>user\nI have a 5 month old baby, what is the common cause of death?<end_of_turn>\n<start_of_turn>model\n"
 inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
 # 6. Run inference
