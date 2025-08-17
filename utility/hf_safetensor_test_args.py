@@ -43,7 +43,7 @@ def generate_response(local_model_path: str, prompt: str, max_new_tokens: int = 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run a local Gemma model with a specified prompt.")
-    parser.add_argument("model_path", type=str, help="The local path to the Gemma model directory.")
+    parser.add_argument("--model_path", type=str, help="The local path to the Gemma model directory.")
     parser.add_argument("--prompt", type=str, default="I have a 5 month old baby, what is the common cause of death? ",
                         help="The prompt to use for the model. Defaults to a placeholder if not provided.")
     parser.add_argument("--max_tokens", type=int, default=200,
