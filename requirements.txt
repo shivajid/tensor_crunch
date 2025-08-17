@@ -11,3 +11,6 @@ grain
 tensorflow_datasets
 wandb
 huggingface_hub
+torch
+transformers
+accelerate
